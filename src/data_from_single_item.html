@@ -1,0 +1,50 @@
+ <!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+<script>
+var app = angular.module('wikidata_app', []);
+
+app.controller('ctrl', function($scope, $http) {
+var id = 'Q212730'; // wikidata-id of Steven Pinker
+$scope.wikidata_id = id;
+var url = 'https://www.wikidata.org/wiki/Special:EntityData/' +
+          id + '.json';
+$http.get(url).success(function(response) {
+    $scope.rsp = response;
+    $scope.labels = response.entities[id].labels; // Note the wikidata id is insertered here
+    var dict = response.entities[id].labels;
+    $scope.lbl_ar = Object.keys(dict).map(function(k) { return dict[k] });
+    $scope.en_lbl = response.entities[id].labels.en.value;
+    $scope.claims = response.entities[id].claims;
+    });
+});
+</script>
+</head>
+<body>
+
+<div ng-app="wikidata_app" ng-controller="ctrl">
+<h1>Wikidata item: {{ en_lbl + ' (' + wikidata_id + ')' }}</h1>
+
+<h2>The labels of the Wikidata item "{{ en_lbl }}" are:</h2>
+<input type="text" ng-model="inpflt"></input>
+
+<ul>
+    <li ng-repeat="x in lbl_ar | filter:inpflt | orderBy:'language' ">
+        {{ x.language + ' - ' + x.value }}
+    </li>
+</ul>
+
+<h2>The claims are:</h2>
+<ul>
+    <li ng-repeat="y in claims">
+        {{ y }}
+    </li>
+</ul>
+
+<h2>The whole Wikidata JSON-response is:</h2>
+<p>{{ rsp }}</p>
+
+</div>
+</html>
+</head>
